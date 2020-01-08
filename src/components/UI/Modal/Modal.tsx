@@ -5,7 +5,8 @@ import classes from './Modal.module.scss';
 
 interface ModalProps {
     show: boolean,
-    modalClosed: any
+    modalClosed: any,
+    children: any
 }
 
 const modal: React.FC<ModalProps> = (props) => {
