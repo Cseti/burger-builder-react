@@ -7,7 +7,7 @@ const withErrorHandler = ( WrappedComponent:any, axios:any ) => {
         state = {
             showError: false,
             error: {
-                message: null as any[]
+                message: [] as any[]
             }
         }
 

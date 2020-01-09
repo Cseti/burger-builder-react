@@ -15,9 +15,13 @@ const INGREDIENT_PRICES = {
     meat: 2
 };
 
-class BurgerBuilder extends Component {
+interface BurgerBuilderInterface {
+    history: any
+}
+
+class BurgerBuilder extends Component<BurgerBuilderInterface> {
     state = {
-        ingredients: null as any[],
+        ingredients: [] as any[],
         totalPrice: 4,
         purchasable: false,
         purchasing: false,
@@ -65,16 +69,20 @@ class BurgerBuilder extends Component {
 
     removeIngredientHandler = (type: any) => {
         const oldCount = this.hasKey(this.state.ingredients, type) ? this.state.ingredients[type] : 0;
+
         if (oldCount <= 0) {
             return;
         }
+
         const updatedCount = oldCount - 1;
         const updatedIngredients = {
             ...this.state.ingredients
         };
+
         if (this.hasKey(updatedIngredients, type)) {
             updatedIngredients[type] = updatedCount;
         }
+
         const priceDeduction = this.hasKey(INGREDIENT_PRICES, type) ? INGREDIENT_PRICES[type] : 0;
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice - priceDeduction;
@@ -91,14 +99,13 @@ class BurgerBuilder extends Component {
             } else {
                 return null;
             }
-        })
-            .reduce((sum, element) => {
-                if ((typeof sum !== undefined) && (typeof element !== undefined)) {
-                    return sum + element;
-                } else {
-                    return 0;
-                }
-            }, 0);
+        }).reduce((sum, element) => {
+            if ((typeof sum !== undefined) && (typeof element !== undefined)) {
+                return sum + element;
+            } else {
+                return 0;
+            }
+        }, 0);
 
         this.setState({purchasable: sum > 0})
     }
@@ -108,31 +115,19 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandler = () => {
-        const order = {
-            ingredients: this.state.ingredients,
-            price: this.state.totalPrice,
-            customer: {
-                name: 'Cseti',
-                address: {
-                    street: 'Street',
-                    zipCode: '2141',
-                    country: 'Hungary'
-                }
-            },
-            deliveryMethod: 'fastest'
-        };
+        const queryParams = [];
 
-        this.setState({loading: true});
+        for (let i in this.state.ingredients) {
+            queryParams.push(encodeURIComponent(i) + '=' + encodeURIComponent(this.state.ingredients[i]));
+        }
 
-        axios.post('/orders.json', order)
-            .then(response => {
-                console.log(response);
-                this.setState({loading: false, purchasing: false});
-            })
-            .catch(error => {
-                console.log(error);
-                this.setState({loading: false, purchasing: false});
-            });
+        queryParams.push('price=' + this.state.totalPrice);
+        const queryString = queryParams.join('&');
+
+        this.props.history.push({
+            pathname: '/checkout',
+            search: queryString
+        });
     }
 
     purchaseHandler = () => {
