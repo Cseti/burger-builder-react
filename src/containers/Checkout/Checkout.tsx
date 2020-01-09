@@ -31,7 +31,6 @@ class Checkout extends Component<CheckoutInterface> {
                 }
             }
 
-            console.log(price);
             this.setState({ingredients: ingredients, totalPrice: price});
         }
     }
