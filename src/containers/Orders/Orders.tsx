@@ -8,7 +8,7 @@ class Orders extends Component {
     state = {
         orders: [] as any[],
         loading: true
-    }
+    };
 
     componentDidMount() {
         axios.get('/orders.json')

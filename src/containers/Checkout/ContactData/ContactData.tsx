@@ -5,11 +5,12 @@ import Spinner from '../../../components/UI/Spinner/Spinner';
 import classes from './ContactData.module.scss';
 import axios from '../../../axios-orders';
 import Input from '../../../components/UI/Input/Input';
+import {connect} from "react-redux";
 
 interface ContactDataInterface {
-    ingredients: any[],
     history: any,
-    price: any
+    ingredients: any[],
+    totalPrice: number
 }
 
 class ContactData extends Component<ContactDataInterface> {
@@ -99,8 +100,7 @@ class ContactData extends Component<ContactDataInterface> {
         },
         formIsValid: false,
         loading: false
-    }
-
+    };
 
     keys<O extends object>(obj: O): Array<keyof O> {
         return Object.keys(obj) as Array<keyof O>;
@@ -119,9 +119,9 @@ class ContactData extends Component<ContactDataInterface> {
 
         const order = {
             ingredients: this.props.ingredients,
-            price: this.props.price,
+            price: this.props.totalPrice,
             orderData: formData
-        }
+        };
 
         axios.post('/orders.json', order)
             .then(response => {
@@ -131,7 +131,7 @@ class ContactData extends Component<ContactDataInterface> {
             .catch(error => {
                 this.setState({loading: false});
             });
-    }
+    };
 
     checkValidity(value: any, rules: any) {
         let isValid = true;
@@ -183,7 +183,7 @@ class ContactData extends Component<ContactDataInterface> {
             formIsValid = updatedOrderForm[inputIdentifier].valid && formIsValid;
         }
         this.setState({orderForm: updatedOrderForm, formIsValid: formIsValid});
-    }
+    };
 
     render() {
         const formElementsArray: any[] = [];
@@ -194,6 +194,7 @@ class ContactData extends Component<ContactDataInterface> {
                 config: this.state.orderForm[key]
             });
         }
+
         let form = (
             <form onSubmit={this.orderHandler}>
                 {formElementsArray.map(formElement => (
@@ -210,9 +211,11 @@ class ContactData extends Component<ContactDataInterface> {
                 <Button btnType="Success" disabled={!this.state.formIsValid}>ORDER</Button>
             </form>
         );
+
         if (this.state.loading) {
             form = <Spinner/>;
         }
+
         return (
             <div className={classes.ContactData}>
                 <h4>Enter your Contact Data</h4>
@@ -222,4 +225,11 @@ class ContactData extends Component<ContactDataInterface> {
     }
 }
 
-export default ContactData;
+const mapStateToProps = (state: any) => {
+    return {
+        ingredients: state.ingredients,
+        totalPrice: state.totalPrice
+    }
+};
+
+export default connect(mapStateToProps)(ContactData);
