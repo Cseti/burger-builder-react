@@ -6,11 +6,15 @@ import classes from './ContactData.module.scss';
 import axios from '../../../axios-orders';
 import Input from '../../../components/UI/Input/Input';
 import {connect} from "react-redux";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import * as actions from '../../../store/actions/index';
 
 interface ContactDataInterface {
     history: any,
     ingredients: any[],
-    totalPrice: number
+    totalPrice: number,
+    onOrderBurger: any,
+    loading: boolean
 }
 
 class ContactData extends Component<ContactDataInterface> {
@@ -95,11 +99,11 @@ class ContactData extends Component<ContactDataInterface> {
                 },
                 value: 'fastest',
                 validation: {},
-                valid: true
+                valid: true,
+                touched: false
             }
         },
-        formIsValid: false,
-        loading: false
+        formIsValid: false
     };
 
     keys<O extends object>(obj: O): Array<keyof O> {
@@ -123,14 +127,7 @@ class ContactData extends Component<ContactDataInterface> {
             orderData: formData
         };
 
-        axios.post('/orders.json', order)
-            .then(response => {
-                this.setState({loading: false});
-                this.props.history.push('/');
-            })
-            .catch(error => {
-                this.setState({loading: false});
-            });
+        this.props.onOrderBurger(order);
     };
 
     checkValidity(value: any, rules: any) {
@@ -186,7 +183,7 @@ class ContactData extends Component<ContactDataInterface> {
     };
 
     render() {
-        const formElementsArray: any[] = [];
+        const formElementsArray = [];
 
         for (let key of this.keys(this.state.orderForm)) {
             formElementsArray.push({
@@ -206,14 +203,14 @@ class ContactData extends Component<ContactDataInterface> {
                         invalid={!formElement.config.valid}
                         shouldValidate={formElement.config.validation}
                         touched={formElement.config.touched}
-                        changed={(event: any) => this.inputChangedHandler(event, formElement.id)}/>
+                        changed={(event:any) => this.inputChangedHandler(event, formElement.id)} />
                 ))}
                 <Button btnType="Success" disabled={!this.state.formIsValid}>ORDER</Button>
             </form>
         );
 
-        if (this.state.loading) {
-            form = <Spinner/>;
+        if ( this.props.loading ) {
+            form = <Spinner />;
         }
 
         return (
@@ -225,11 +222,18 @@ class ContactData extends Component<ContactDataInterface> {
     }
 }
 
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state:any) => {
     return {
-        ingredients: state.ingredients,
-        totalPrice: state.totalPrice
+        ingredients: state.burgerBuilder.ingredients,
+        price: state.burgerBuilder.totalPrice,
+        loading: state.order.loading
     }
 };
 
-export default connect(mapStateToProps)(ContactData);
+const mapDispatchToProps = (dispatch:any) => {
+    return {
+        onOrderBurger: (orderData:any) => dispatch(actions.purchaseBurger(orderData))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(ContactData, axios));

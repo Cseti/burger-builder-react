@@ -5,87 +5,33 @@ import Burger from '../../components/Burger/Burger';
 import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import Modal from '../../components/UI/Modal/Modal';
-import axios from '../../axios-orders';
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import * as actionTypes from "../../store/actions";
+import * as burgerBuilderActions from '../../store/actions/index';
+import axios from '../../axios-orders';
 
 interface BurgerBuilderInterface {
     history: any,
     ingredients: any,
     onIngredientAdded: any,
     onIngredientRemoved: any,
-    totalPrice: number
+    onInitIngredients: any,
+    totalPrice: number,
+    error: boolean
 }
 
 class BurgerBuilder extends Component<BurgerBuilderInterface> {
     state = {
-        // purchasable: false,
         purchasing: false,
-        loading: false,
-        error: false
     };
 
     componentDidMount(): void {
-        // axios.get('https://react-burger-builder-3698c.firebaseio.com/ingredients.json')
-        //     .then(response => {
-        //         if (response && response.data) {
-        //             this.setState({ingredients: response.data});
-        //         } else {
-        //             this.setState({error: true});
-        //         }
-        //     })
-        //     .catch(error => {
-        //         console.log(error);
-        //         this.setState({error: true});
-        //     });
+        this.props.onInitIngredients();
     }
 
     hasKey<O>(obj: O, key: keyof any): key is keyof O {
         return key in obj
     }
-
-    addIngredientHandler = (type: any) => {
-        // const oldCount = this.hasKey(this.props.ingredients, type) ? this.props.ingredients[type] : 0;
-        //
-        // const updatedCount = oldCount + 1;
-        // const updatedIngredients = {
-        //     ...this.props.ingredients
-        // };
-        //
-        // if (this.hasKey(updatedIngredients, type)) {
-        //     updatedIngredients[type] = updatedCount;
-        // }
-        //
-        // const priceAddition = this.hasKey(INGREDIENT_PRICES, type) ? INGREDIENT_PRICES[type] : 0;
-        // const oldPrice = this.state.totalPrice;
-        // const newPrice = oldPrice + priceAddition;
-        // this.setState({totalPrice: newPrice, ingredients: updatedIngredients})
-        // this.updatePurchaseState(updatedIngredients);
-    };
-
-    removeIngredientHandler = (type: any) => {
-        // const oldCount = this.hasKey(this.props.ingredients, type) ? this.props.ingredients[type] : 0;
-        //
-        // if (oldCount <= 0) {
-        //     return;
-        // }
-        //
-        // const updatedCount = oldCount - 1;
-        // const updatedIngredients = {
-        //     ...this.props.ingredients
-        // };
-        //
-        // if (this.hasKey(updatedIngredients, type)) {
-        //     updatedIngredients[type] = updatedCount;
-        // }
-        //
-        // const priceDeduction = this.hasKey(INGREDIENT_PRICES, type) ? INGREDIENT_PRICES[type] : 0;
-        // const oldPrice = this.state.totalPrice;
-        // const newPrice = oldPrice - priceDeduction;
-        // this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
-        // this.updatePurchaseState(updatedIngredients);
-    };
 
     updatePurchaseState = (ingredients: any) => {
         let sum: any;
@@ -104,7 +50,6 @@ class BurgerBuilder extends Component<BurgerBuilderInterface> {
             }
         }, 0);
 
-        // this.setState({purchasable: sum > 0});
         return sum > 0;
     };
 
@@ -147,7 +92,7 @@ class BurgerBuilder extends Component<BurgerBuilderInterface> {
         }
 
         let orderSummary = null;
-        let burger = this.state.error ? <p>Ingredients can't be loaded!</p> : <Spinner/>;
+        let burger = this.props.error ? <p>Ingredients can't be loaded!</p> : <Spinner/>;
 
         if (this.props.ingredients) {
             burger = (
@@ -172,10 +117,6 @@ class BurgerBuilder extends Component<BurgerBuilderInterface> {
             />;
         }
 
-        if (this.state.loading) {
-            orderSummary = <Spinner/>
-        }
-
         return (
             <>
                 <Modal
@@ -192,15 +133,17 @@ class BurgerBuilder extends Component<BurgerBuilderInterface> {
 
 const mapStateToProps = (state: any) => {
     return {
-        ingredients: state.ingredients,
-        totalPrice: state.totalPrice
+        ingredients: state.burgerBuilder.ingredients,
+        totalPrice: state.burgerBuilder.totalPrice,
+        error: state.burgerBuilder.error
     }
 };
 
 const mapDispatchToProps = (dispatch: any) => {
     return {
-        onIngredientAdded: (ingName: string) => dispatch({type: actionTypes.ADD_INGREDIENTS, ingredientName: ingName}),
-        onIngredientRemoved: (ingName: string) => dispatch({type: actionTypes.REMOVE_INGREDIENTS, ingredientName: ingName})
+        onIngredientAdded: (ingName: string) => dispatch(burgerBuilderActions.addIngredients(ingName)),
+        onIngredientRemoved: (ingName: string) => dispatch(burgerBuilderActions.removeIngredients(ingName)),
+        onInitIngredients: () => dispatch(burgerBuilderActions.initIngredients())
     }
 };
 
