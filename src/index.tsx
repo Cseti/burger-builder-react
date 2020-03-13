@@ -10,6 +10,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import burgerBuilder from "./store/reducers/burgerBuilder";
 import order from "./store/reducers/order";
+import auth from "./store/reducers/auth";
 
 declare global {
     interface Window {
@@ -17,11 +18,12 @@ declare global {
     }
 }
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancers = (process.env.NODE_ENV === "development" ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : null) || compose;
 
 const rootReducer = combineReducers({
     burgerBuilder: burgerBuilder,
-    order: order
+    order: order,
+    auth: auth
 });
 
 const store = createStore(rootReducer, composeEnhancers(

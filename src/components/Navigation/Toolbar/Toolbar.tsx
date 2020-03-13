@@ -1,23 +1,18 @@
-import React from "react";
+import React from 'react';
 
-import DrawerToggle from "../SideDrawer/DrawerToggle/DrawerToggle";
-import NavigationItems from "../NavigationItems/NavigationItems";
+import classes from './Toolbar.module.scss';
 import Logo from '../../Logo/Logo';
+import NavigationItems from '../NavigationItems/NavigationItems';
+import DrawerToggle from '../SideDrawer/DrawerToggle/DrawerToggle';
 
-import classes from "./Toolbar.module.scss";
-
-interface ToolbarProps {
-    drawerToggleClicked: any
-}
-
-const toolbar: React.FC<ToolbarProps> = (props) => (
+const toolbar = ( props:any ) => (
     <header className={classes.Toolbar}>
-        <DrawerToggle clicked={props.drawerToggleClicked}/>
+        <DrawerToggle clicked={props.drawerToggleClicked} />
         <div className={classes.Logo}>
             <Logo />
         </div>
         <nav className={classes.DesktopOnly}>
-            <NavigationItems/>
+            <NavigationItems isAuthenticated={props.isAuth} />
         </nav>
     </header>
 );
